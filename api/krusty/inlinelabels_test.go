@@ -497,6 +497,85 @@ spec:
 `)
 }
 
+func TestKustomizationLabelsInStatefulSetTemplateWithClaimTemplateIncludeTemplateFalseAndIncludeVolumeClaimTemplatesTrue(t *testing.T) {
+	th := kusttest_test.MakeHarness(t)
+	th.WriteF("app/sts.yaml", `
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app.kubernetes.io/name: set
+  name: set
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: set
+  serviceName: set
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: set
+    volumeMounts:
+    - mountPath: /usr/src/app/data
+      name: usrdata
+  volumeClaimTemplates:
+  - metadata:
+      name: usrdata
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+`)
+	th.WriteK("/app", `
+resources:
+- sts.yaml
+
+labels:
+- pairs:
+    foo: bar
+  includeSelectors: false
+  includeTemplates: false
+  includeVolumeClaimTemplates: true
+`)
+	m := th.Run("/app", th.MakeDefaultOptions())
+	th.AssertActualEqualsExpected(m, `
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app.kubernetes.io/name: set
+    foo: bar
+  name: set
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: set
+  serviceName: set
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: set
+    volumeMounts:
+    - mountPath: /usr/src/app/data
+      name: usrdata
+  volumeClaimTemplates:
+  - metadata:
+      labels:
+        foo: bar
+      name: usrdata
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+`)
+}
+
 func TestKustomizationLabelsInStatefulSetTemplateWithClaimTemplateAndIncludeVolumeClaimTemplatesTrue(t *testing.T) {
 	th := kusttest_test.MakeHarness(t)
 	th.WriteF("app/sts.yaml", `
