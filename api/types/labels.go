@@ -20,8 +20,8 @@ type Label struct {
 	// spec/volumeClaimTemplates[]/metadata fieldSpec. Custom fieldSpecs specified by
 	// FieldSpecs will be merged with spec/volumeClaimTemplates[]/metadata fieldSpec if this
 	// is true. If IncludeSelectors is true, IncludeVolumeClaimTemplates is not needed.
-	IncludeVolumeClaimTemplates bool        `json:"includeVolumeClaimTemplates,omitempty" yaml:"includeVolumeClaimTemplates,omitempty"`
-	FieldSpecs                  []FieldSpec `json:"fields,omitempty" yaml:"fields,omitempty"`
+	IncludeVolumeClaimTemplates bool `json:"includeVolumeClaimTemplates,omitempty" yaml:"includeVolumeClaimTemplates,omitempty"`
+	FieldSpecs []FieldSpec `json:"fields,omitempty" yaml:"fields,omitempty"`
 }
 
 func labelFromCommonLabels(commonLabels map[string]string) *Label {
